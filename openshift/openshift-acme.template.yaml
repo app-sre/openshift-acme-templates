@@ -105,9 +105,3 @@ objects:
     - update
     - patch
     - delete
-- kind: ServiceAccount
-  apiVersion: v1
-  metadata:
-    name: openshift-acme
-    labels:
-      app: openshift-acme
