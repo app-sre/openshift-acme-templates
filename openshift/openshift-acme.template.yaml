@@ -16,7 +16,7 @@ objects:
         app: openshift-acme
     replicas: 1
     strategy:
-      type: Recreate
+      type: RollingUpdate
     template:
       metadata:
         labels:
@@ -25,31 +25,109 @@ objects:
         serviceAccountName: openshift-acme
         containers:
         - name: openshift-acme
-          image: docker.io/tnozicka/openshift-acme:latest
+          image: ${IMAGE}:${CONTROLLER_IMAGE_TAG}
           imagePullPolicy: Always
-          ports:
-          - containerPort: 5000
+          args:
+          - --exposer-image=${IMAGE}:${EXPOSER_IMAGE_TAG}
+          - --loglevel=4
+          - --namespace=$(CURRENT_NAMESPACE)
           env:
-          - name: OPENSHIFT_ACME_EXPOSER_IP
-            valueFrom:
-              fieldRef:
-                fieldPath: status.podIP
-          - name: OPENSHIFT_ACME_ACMEURL
-            value: "https://acme-v01.api.letsencrypt.org/directory"
-          - name: OPENSHIFT_ACME_LOGLEVEL
-            value: "4"
-          - name: OPENSHIFT_ACME_NAMESPACE
+          - name: CURRENT_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
-          volumeMounts:
-          - name: podinfo
-            mountPath: /dapi
-            readOnly: true
-        volumes:
-        - name: podinfo
-          downwardAPI:
-            items:
-            - path: "labels"
-              fieldRef:
-                fieldPath: metadata.labels
+- kind: ConfigMap
+  apiVersion: v1
+  metadata:
+    name: letsencrypt-live
+    annotations:
+      "acme.openshift.io/priority": "100"
+    labels:
+      managed-by: "openshift-acme"
+      type: "CertIssuer"
+  data:
+    "cert-issuer.types.acme.openshift.io": '{"type":"ACME","acmeCertIssuer":{"directoryUrl":"https://acme-v02.api.letsencrypt.org/directory"}}'
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: openshift-acme
+    labels:
+      app: openshift-acme
+  rules:
+  - apiGroups:
+    - "route.openshift.io"
+    resources:
+    - routes
+    verbs:
+    - create
+    - get
+    - list
+    - watch
+    - update
+    - patch
+    - delete
+    - deletecollection
+  - apiGroups:
+    - "route.openshift.io"
+    resources:
+    - routes/custom-host
+    verbs:
+    - create
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    - services
+    - secrets
+    verbs:
+    - create
+    - get
+    - list
+    - watch
+    - update
+    - patch
+    - delete
+  - apiGroups:
+    - ""
+    resources:
+    - limitranges
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - "apps"
+    resources:
+    - replicasets
+    verbs:
+    - create
+    - get
+    - list
+    - watch
+    - update
+    - patch
+    - delete
+- kind: ServiceAccount
+  apiVersion: v1
+  metadata:
+    name: openshift-acme
+    labels:
+      app: openshift-acme
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: openshift-acme
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: openshift-acme
+  subjects:
+  - kind: ServiceAccount
+    name: openshift-acme
+parameters:
+- name: IMAGE
+  value: quay.io/tnozicka/openshift-acme
+- name: CONTROLLER_IMAGE_TAG
+  value: controller
+- name: EXPOSER_IMAGE_TAG
+  value: exposer
