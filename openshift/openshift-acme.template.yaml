@@ -126,7 +126,7 @@ objects:
     name: openshift-acme
 parameters:
 - name: IMAGE
-  value: quay.io/app-sre/openshift-acme
+  value: quay.io/tnozicka/openshift-acme
 - name: CONTROLLER_IMAGE_TAG
   value: controller
 - name: EXPOSER_IMAGE_TAG
