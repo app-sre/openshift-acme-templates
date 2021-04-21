@@ -115,11 +115,11 @@ objects:
                 fieldPath: metadata.namespace
           resources:
             requests:
-              cpu: 25m
-              memory: 50Mi
+              cpu: ${CPU_REQUESTS}
+              memory: ${MEMORY_REQUESTS}
             limits:
-              cpu: 25m
-              memory: 50Mi
+              cpu: ${CPU_LIMITS}
+              memory: ${MEMORY_LIMITS}
 - kind: ConfigMap
   apiVersion: v1
   metadata:
@@ -138,3 +138,11 @@ parameters:
   value: controller
 - name: EXPOSER_IMAGE_TAG
   value: exposer
+- name: CPU_REQUESTS
+  value: 25m
+- name: MEMORY_REQUESTS
+  value: 50Mi
+- name: CPU_LIMITS
+  value: 25m
+- name: MEMORY_LIMITS
+  value: 50Mi
