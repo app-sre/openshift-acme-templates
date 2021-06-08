@@ -139,10 +139,10 @@ parameters:
 - name: EXPOSER_IMAGE_TAG
   value: exposer
 - name: CPU_REQUESTS
-  value: 25m
+  value: 50m
 - name: MEMORY_REQUESTS
   value: 50Mi
 - name: CPU_LIMITS
-  value: 25m
+  value: 100m
 - name: MEMORY_LIMITS
-  value: 50Mi
+  value: 100Mi
