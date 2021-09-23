@@ -123,6 +123,22 @@ objects:
             limits:
               cpu: ${CPU_LIMITS}
               memory: ${MEMORY_LIMITS}
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "ps -A | grep openshift-acme"
+            initialDelaySeconds: 10
+            periodSeconds: 60
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - "ps -A | grep openshift-acme"
+            initialDelaySeconds: 10
+            periodSeconds: 60
 - kind: ConfigMap
   apiVersion: v1
   metadata:
