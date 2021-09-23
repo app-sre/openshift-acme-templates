@@ -87,6 +87,9 @@ objects:
     name: openshift-acme
     labels:
       app: openshift-acme
+    annotations:
+      email: ${OWNER_EMAIL}
+      owner: ${OWNER_NAME}
   spec:
     selector:
       matchLabels:
@@ -146,3 +149,7 @@ parameters:
   value: 100m
 - name: MEMORY_LIMITS
   value: 100Mi
+- name: OWNER_EMAIL
+  value: owner@example.com
+- name: OWNER_NAME
+  value: example-owner
