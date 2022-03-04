@@ -120,6 +120,14 @@ objects:
             limits:
               cpu: ${CPU_LIMITS}
               memory: ${MEMORY_LIMITS}
+          # Force all pods to expire after a few days, to ensure we
+          # get security updates
+          livenessProbe:
+            exec:
+              command:
+                - awk
+                - {exit($1 > ${POD_EXPIRATION_DAYS} * 86400)}
+                - /proc/uptime
 - kind: ConfigMap
   apiVersion: v1
   metadata:
@@ -146,3 +154,5 @@ parameters:
   value: 100m
 - name: MEMORY_LIMITS
   value: 100Mi
+- name: POD_EXPIRATION_DAYS
+  value: 14
